@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: bilibili-mcp-client
+  ai:
+    dashscope:
+      api-key: XXXX
+      chat:
+        options:
+          model: qwen-plus
+    mcp:
+      client:
+        enabled: true
+        name: bilibili-mcp-client
+        version: 1.0.0
+        request-timeout: 30s
+        type: SYNC  # 使用同步客户端
+        initialized: true
+        root-change-notification: true
+        toolcallback:
+          enabled: true  # 启用工具回调集成
+        stdio:
+          connections:
+            bilibili-server:
+              command: java
+              args:
+                - -Dspring.ai.mcp.server.stdio=true
+                - -Dspring.main.web-application-type=none
+                - -Dlogging.pattern.console=
+                - -jar
+                - ../mcp-bilibili-server-main/target/bilibili-mcp-server-1.0.0-SNAPSHOT.jar
+              env:
+                JAVA_HOME: ${JAVA_HOME}
+
+# 服务器配置
+server:
+  port: 8090
+
+# 日志配置
+logging:
+  level:
+    com.demo.mcp: DEBUG
+    org.springframework.ai: DEBUG
+    root: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n" 

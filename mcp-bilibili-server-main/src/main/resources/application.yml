@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: bilibili-mcp-server
+  main:
+    web-application-type: none
+    banner-mode: off
+  # 默认 dev 环境
+#  profiles:
+#    active: dev
+  ai:
+    mcp:
+      server:
+        stdio: true # 启用stdio模式
+        name: bilibili-mcp-server
+        version: 1.0.0
+
+# 哔哩哔哩相关配置
+bilibili:
+  api:
+    search: https://api.bilibili.com/x/web-interface/search/all/v2
+    videoInfo: https://api.bilibili.com/x/web-interface/view
+    userVideos: https://api.bilibili.com/x/space/arc/search
+    userInfo: https://api.bilibili.com/x/web-interface/nav
+    playUrl: https://api.bilibili.com/x/player/playurl
+  download:
+    # 下载目录配置 - 支持绝对路径和相对路径
+    baseDir: E:/videos/downloads  # 下载文件保存目录（相对于项目根目录）
+    tempDir: E:/videos/temp       # 临时文件目录（相对于项目根目录）
+    
+    # 或者使用绝对路径示例：
+    # baseDir: D:/Downloads/bilibili
+    # tempDir: D:/Downloads/bilibili/temp
+    
+    # 下载参数
+    maxConcurrentDownloads: 3              # 最大并发下载数
+    timeout: 30000                         # 下载超时时间(毫秒)
+    
+    # 文件命名规则
+    fileNameTemplate: "{title}_{bvid}"     # 文件名模板: {title}、{bvid}、{author}、{date}
+    createSubDir: true                     # 是否为每个视频创建子目录
+    
+    # 清理策略
+    autoCleanTemp: false                   # 是否自动清理临时文件（暂时禁用以便调试）
+    keepTempOnError: true                  # 错误时是否保留临时文件
+  headers:
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+    referer: "https://www.bilibili.com/"
+

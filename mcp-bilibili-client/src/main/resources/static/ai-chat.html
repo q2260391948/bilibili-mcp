@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>哔哩哔哩AI助手</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .chat-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        
+        .chat-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px 15px 0 0;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chat-messages {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid rgba(255, 255, 255, 0.2);
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            max-height: calc(100vh - 200px);
+        }
+        
+        .chat-input {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 0 0 15px 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .message {
+            margin-bottom: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        .message-user {
+            text-align: right;
+        }
+        
+        .message-ai {
+            text-align: left;
+        }
+        
+        .message-bubble {
+            display: inline-block;
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            word-wrap: break-word;
+        }
+        
+        .message-user .message-bubble {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .message-ai .message-bubble {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+        }
+        
+        .step-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 8px 0;
+            border-left: 4px solid;
+        }
+        
+        .step-success {
+            border-left-color: #28a745;
+        }
+        
+        .step-error {
+            border-left-color: #dc3545;
+        }
+        
+        .step-processing {
+            border-left-color: #ffc107;
+        }
+        
+        .typing-indicator {
+            display: none;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        .typing-dots {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 18px;
+            padding: 12px 16px;
+        }
+        
+        .typing-dots span {
+            height: 8px;
+            width: 8px;
+            background: #999;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 0 2px;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+        
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .input-group {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 25px;
+            overflow: hidden;
+        }
+        
+        .form-control {
+            border: none;
+            padding: 15px 20px;
+            font-size: 16px;
+        }
+        
+        .btn-send {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            padding: 15px 25px;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-send:hover {
+            background: linear-gradient(45deg, #5a6fd8, #6a4190);
+            transform: scale(1.05);
+            color: white;
+        }
+        
+        .btn-send:disabled {
+            opacity: 0.6;
+            transform: none;
+        }
+        
+        .example-messages {
+            margin-top: 15px;
+        }
+        
+        .example-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            margin: 5px;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .example-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .ai-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 10px;
+            vertical-align: top;
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff7b7b, #667eea);
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-left: 10px;
+            vertical-align: top;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- 聊天头部 -->
+        <div class="chat-header">
+            <h2 class="text-white mb-2">
+                <i class="bi bi-robot"></i>
+                哔哩哔哩AI助手
+            </h2>
+            <p class="text-white-50 mb-0">我可以帮您智能管理哔哩哔哩视频</p>
+        </div>
+        
+        <!-- 聊天消息区域 -->
+        <div class="chat-messages" id="chatMessages">
+            <!-- 欢迎消息 -->
+            <div class="message message-ai">
+                <div class="message-bubble">
+                    <div class="fw-bold mb-2">🤖 AI助手</div>
+                    <div>您好！我可以帮您设置登录、搜索视频、下载视频等。直接告诉我您想要做什么！</div>
+                </div>
+            </div>
+            
+            <!-- 示例消息 -->
+            <div class="example-messages text-center">
+                <div class="text-white-50 mb-2">💡 您可以试试这些命令：</div>
+                <button class="btn example-btn" onclick="sendExampleMessage('设置SESSDATA=7a93a2bd%2C1764982481%2Cb6385%2A61CjArtVKTwbpCX2ezQBhpO-sJ0ERebnCs6cblaglvIqt8bBmvrU-hSegYW87RFTMK2aQSVjFPU2h6anpZMS1PaThiQ3B6M0FaZmhkXzJFY0Z6dVlQZDZ1SDgwVUI5TUphWWxIYm5DZDc3aDJ5T0xoMmpNSGdwUGFIbUdlXzI4dXpXNy1vb0t5WnB3IIEC')">设置登录信息</button>
+                <button class="btn example-btn" onclick="sendExampleMessage('搜索MCP视频')">搜索MCP视频</button>
+                <button class="btn example-btn" onclick="sendExampleMessage('下载MCP视频')">下载MCP视频</button>
+                <button class="btn example-btn" onclick="sendExampleMessage('检查系统状态')">检查状态</button>
+            </div>
+        </div>
+        
+        <!-- 输入区域 -->
+        <div class="chat-input">
+            <div class="input-group">
+                <input type="text" class="form-control" id="messageInput" 
+                       placeholder="告诉我您想要做什么..." 
+                       onkeypress="handleKeyPress(event)">
+                <button class="btn btn-send" type="button" id="sendBtn" onclick="sendMessage()">
+                    <i class="bi bi-send-fill"></i>
+                    发送
+                </button>
+            </div>
+        </div>
+        
+        <!-- 打字指示器 -->
+        <div class="typing-indicator" id="typingIndicator">
+            <span class="ai-avatar">
+                <i class="bi bi-robot"></i>
+            </span>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const typingIndicator = document.getElementById('typingIndicator');
+        
+        // 发送消息
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+            
+            // 添加用户消息
+            addUserMessage(message);
+            messageInput.value = '';
+            
+            // 禁用发送按钮并显示打字指示器
+            setLoading(true);
+            
+            try {
+                // 发送到后端
+                const response = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // 添加AI回复
+                addAIMessage(result);
+                
+            } catch (error) {
+                console.error('发送消息失败:', error);
+                addAIMessage({
+                    success: false,
+                    message: '发送失败: ' + error.message,
+                    steps: []
+                });
+            } finally {
+                setLoading(false);
+            }
+        }
+        
+        // 添加用户消息
+        function addUserMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message message-user';
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    <div class="fw-bold mb-1">👤 您</div>
+                    <div>${escapeHtml(message)}</div>
+                </div>
+                <span class="user-avatar">
+                    <i class="bi bi-person-fill"></i>
+                </span>
+            `;
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        // 添加AI消息
+        function addAIMessage(result) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message message-ai';
+            
+            let content = `
+                <span class="ai-avatar">
+                    <i class="bi bi-robot"></i>
+                </span>
+                <div class="message-bubble">
+                    <div class="fw-bold mb-2">🤖 AI助手</div>
+            `;
+            
+            // AI分析消息
+            if (result.aiMessage) {
+                content += `<div class="mb-2">${escapeHtml(result.aiMessage)}</div>`;
+            }
+            
+            // 执行步骤
+            if (result.steps && result.steps.length > 0) {
+                content += '<div class="mt-2"><strong>执行过程：</strong></div>';
+                result.steps.forEach(step => {
+                    const stepClass = step.success ? 'step-success' : 'step-error';
+                    const icon = step.success ? '✅' : '❌';
+                    content += `
+                        <div class="step-item ${stepClass}">
+                            <div class="fw-bold">${icon} ${escapeHtml(step.title)}</div>
+                            <div class="mt-1">${escapeHtml(step.content)}</div>
+                        </div>
+                    `;
+                });
+            }
+            
+            // 最终消息
+            if (result.message) {
+                const icon = result.success ? '✅' : '❌';
+                content += `<div class="mt-2 fw-bold">${icon} ${escapeHtml(result.message)}</div>`;
+            }
+            
+            content += '</div>';
+            messageDiv.innerHTML = content;
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+        
+        // 发送示例消息
+        function sendExampleMessage(message) {
+            messageInput.value = message;
+            sendMessage();
+        }
+        
+        // 设置加载状态
+        function setLoading(loading) {
+            sendBtn.disabled = loading;
+            if (loading) {
+                sendBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> 处理中...';
+                typingIndicator.style.display = 'block';
+            } else {
+                sendBtn.innerHTML = '<i class="bi bi-send-fill"></i> 发送';
+                typingIndicator.style.display = 'none';
+            }
+        }
+        
+        // 滚动到底部
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 100);
+        }
+        
+        // 处理回车键
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+        
+        // HTML转义
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // 页面加载完成后聚焦输入框
+        document.addEventListener('DOMContentLoaded', function() {
+            messageInput.focus();
+            
+            // 隐藏示例消息（延迟显示更自然）
+            setTimeout(() => {
+                const examples = document.querySelector('.example-messages');
+                if (examples) {
+                    examples.style.transition = 'opacity 0.5s ease';
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html> 
