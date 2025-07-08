@@ -9,10 +9,12 @@ import com.alibaba.dashscope.exception.ApiException;
 import com.alibaba.dashscope.exception.InputRequiredException;
 import com.alibaba.dashscope.exception.NoApiKeyException;
 import com.alibaba.dashscope.utils.JsonUtils;
+import com.google.gson.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -179,21 +181,17 @@ public class AIBilibiliService {
                 log.warn("AI响应为空");
                 return createDefaultPlan("AI响应为空，请重试");
             }
-            
-            // 提取JSON部分
-            Pattern jsonPattern = Pattern.compile("\\{[^{}]*\\}", Pattern.DOTALL);
-            Matcher matcher = jsonPattern.matcher(aiResponse);
-            
-            if (matcher.find()) {
-                String jsonStr = matcher.group();
-                Map<String, Object> result = JsonUtils.fromJson(jsonStr, Map.class);
-                if (result != null && !result.isEmpty()) {
-                    return result;
-                }
+
+            Map<String, Object> plan = new HashMap<>();
+            Map<String, Object> parameters = null;
+            JsonObject jsonObject = JsonUtils.fromJson(aiResponse, JsonObject.class);
+            if (!StringUtils.isEmpty(jsonObject.get("parameters"))){
+                parameters = JsonUtils.fromJson(jsonObject.get("parameters"), Map.class);
             }
-            
-            // 如果没有找到JSON，尝试简单解析
-            return parseSimpleResponse(aiResponse);
+            plan.put("action",Objects.isNull(jsonObject.get("action"))?"":jsonObject.get("action").getAsString());
+            plan.put("parameters",parameters);
+            plan.put("message",Objects.isNull(jsonObject.get("message"))?"":jsonObject.get("message").getAsString());
+            return plan;
             
         } catch (Exception e) {
             log.error("解析AI响应失败: " + aiResponse, e);
@@ -215,125 +213,125 @@ public class AIBilibiliService {
     /**
      * 简单解析响应（备用方案）
      */
-    private Map<String, Object> parseSimpleResponse(String response) {
-        if (response == null || response.trim().isEmpty()) {
-            return createDefaultPlan("响应内容为空");
-        }
-        
-        Map<String, Object> plan = new HashMap<>();
-        Map<String, Object> parameters = new HashMap<>();
-        
-        String lowerResponse = response.toLowerCase();
-        
-        if (lowerResponse.contains("sessdata")) {
-            plan.put("action", "setSessdata");
-            // 提取SESSDATA，支持更宽松的模式
-            Pattern sessdataPattern = Pattern.compile("sessdata[=：:\\s]*([a-zA-Z0-9%\\-_]+)");
-            Matcher matcher = sessdataPattern.matcher(response);
-            if (matcher.find() && matcher.group(1) != null) {
-                parameters.put("sessdata", matcher.group(1));
-            }
-        } else if (lowerResponse.contains("搜索") || lowerResponse.contains("search")) {
-            plan.put("action", "search");
-            String keyword = extractKeywordImproved(response);
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                parameters.put("keyword", keyword);
-            }
-        } else if (lowerResponse.contains("下载") || lowerResponse.contains("download")) {
-            plan.put("action", "searchAndDownload");
-            String keyword = extractKeywordImproved(response);
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                parameters.put("keyword", keyword);
-            }
-        } else if (lowerResponse.contains("状态") || lowerResponse.contains("status")) {
-            plan.put("action", "serverStatus");
-        } else {
-            // 如果包含人名，默认为搜索
-            String keyword = extractKeywordImproved(response);
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                plan.put("action", "search");
-                parameters.put("keyword", keyword);
-            } else {
-                plan.put("action", "serverStatus");
-            }
-        }
-        
-        plan.put("parameters", parameters);
-        plan.put("message", "正在处理您的请求...");
-        
-        return plan;
-    }
+//    private Map<String, Object> parseSimpleResponse(String response) {
+//        if (response == null || response.trim().isEmpty()) {
+//            return createDefaultPlan("响应内容为空");
+//        }
+//
+//        Map<String, Object> plan = new HashMap<>();
+//        Map<String, Object> parameters = new HashMap<>();
+//
+//        String lowerResponse = response.toLowerCase();
+//
+//        if (lowerResponse.contains("sessdata")) {
+//            plan.put("action", "setSessdata");
+//            // 提取SESSDATA，支持更宽松的模式
+//            Pattern sessdataPattern = Pattern.compile("sessdata[=：:\\s]*([a-zA-Z0-9%\\-_]+)");
+//            Matcher matcher = sessdataPattern.matcher(response);
+//            if (matcher.find() && matcher.group(1) != null) {
+//                parameters.put("sessdata", matcher.group(1));
+//            }
+//        } else if (lowerResponse.contains("搜索") || lowerResponse.contains("search")) {
+//            plan.put("action", "search");
+//            String keyword = extractKeywordImproved(response);
+//            if (keyword != null && !keyword.trim().isEmpty()) {
+//                parameters.put("keyword", keyword);
+//            }
+//        } else if (lowerResponse.contains("下载") || lowerResponse.contains("download")) {
+//            plan.put("action", "searchAndDownload");
+//            String keyword = extractKeywordImproved(response);
+//            if (keyword != null && !keyword.trim().isEmpty()) {
+//                parameters.put("keyword", keyword);
+//            }
+//        } else if (lowerResponse.contains("状态") || lowerResponse.contains("status")) {
+//            plan.put("action", "serverStatus");
+//        } else {
+//            // 如果包含人名，默认为搜索
+//            String keyword = extractKeywordImproved(response);
+//            if (keyword != null && !keyword.trim().isEmpty()) {
+//                plan.put("action", "search");
+//                parameters.put("keyword", keyword);
+//            } else {
+//                plan.put("action", "serverStatus");
+//            }
+//        }
+//
+//        plan.put("parameters", parameters);
+//        plan.put("message", "正在处理您的请求...");
+//
+//        return plan;
+//    }
 
     /**
      * 提取关键词
      */
-    private String extractKeyword(String text) {
-        // 简单的关键词提取逻辑
-        String[] commonWords = {"搜索", "下载", "的", "视频", "找", "查找"};
-        String[] words = text.split("\\s+");
-        
-        for (String word : words) {
-            boolean isCommon = false;
-            for (String common : commonWords) {
-                if (word.contains(common)) {
-                    isCommon = true;
-                    break;
-                }
-            }
-            if (!isCommon && word.length() > 1) {
-                return word;
-            }
-        }
-        return null;
-    }
+//    private String extractKeyword(String text) {
+//        // 简单的关键词提取逻辑
+//        String[] commonWords = {"搜索", "下载", "的", "视频", "找", "查找"};
+//        String[] words = text.split("\\s+");
+//
+//        for (String word : words) {
+//            boolean isCommon = false;
+//            for (String common : commonWords) {
+//                if (word.contains(common)) {
+//                    isCommon = true;
+//                    break;
+//                }
+//            }
+//            if (!isCommon && word.length() > 1) {
+//                return word;
+//            }
+//        }
+//        return null;
+//    }
 
     /**
      * 改进的关键词提取
      */
-    private String extractKeywordImproved(String text) {
-        if (text == null || text.trim().isEmpty()) {
-            return null;
-        }
-        
-        // 移除常见的停用词
-        String[] stopWords = {"设置", "搜索", "下载", "的", "视频", "找", "查找", "所有", "全部", 
-                              "我想", "我要", "帮我", "请", "可以", "能", "吗", "呢", "吧"};
-        
-        // 首先尝试匹配人名或UP主名字
-        String[] knownCreators = {"程序员鱼皮", "鱼皮", "李鱼皮"};
-        for (String creator : knownCreators) {
-            if (text.contains(creator)) {
-                return creator;
-            }
-        }
-        
-        // 分词并过滤
-        String[] words = text.replaceAll("[，。！？；：、]", " ").split("\\s+");
-        StringBuilder result = new StringBuilder();
-        
-        for (String word : words) {
-            word = word.trim();
-            if (word.length() < 2) continue;
-            
-            boolean isStopWord = false;
-            for (String stopWord : stopWords) {
-                if (word.equals(stopWord) || word.contains(stopWord)) {
-                    isStopWord = true;
-                    break;
-                }
-            }
-            
-            if (!isStopWord) {
-                if (result.length() > 0) {
-                    result.append(" ");
-                }
-                result.append(word);
-            }
-        }
-        
-        String extracted = result.toString().trim();
-        return extracted.isEmpty() ? null : extracted;
-    }
+//    private String extractKeywordImproved(String text) {
+//        if (text == null || text.trim().isEmpty()) {
+//            return null;
+//        }
+//
+//        // 移除常见的停用词
+//        String[] stopWords = {"设置", "搜索", "下载", "的", "视频", "找", "查找", "所有", "全部",
+//                              "我想", "我要", "帮我", "请", "可以", "能", "吗", "呢", "吧"};
+//
+//        // 首先尝试匹配人名或UP主名字
+//        String[] knownCreators = {"程序员鱼皮", "鱼皮", "李鱼皮"};
+//        for (String creator : knownCreators) {
+//            if (text.contains(creator)) {
+//                return creator;
+//            }
+//        }
+//
+//        // 分词并过滤
+//        String[] words = text.replaceAll("[，。！？；：、]", " ").split("\\s+");
+//        StringBuilder result = new StringBuilder();
+//
+//        for (String word : words) {
+//            word = word.trim();
+//            if (word.length() < 2) continue;
+//
+//            boolean isStopWord = false;
+//            for (String stopWord : stopWords) {
+//                if (word.equals(stopWord) || word.contains(stopWord)) {
+//                    isStopWord = true;
+//                    break;
+//                }
+//            }
+//
+//            if (!isStopWord) {
+//                if (result.length() > 0) {
+//                    result.append(" ");
+//                }
+//                result.append(word);
+//            }
+//        }
+//
+//        String extracted = result.toString().trim();
+//        return extracted.isEmpty() ? null : extracted;
+//    }
 
     /**
      * 执行SESSDATA设置
