@@ -100,20 +100,20 @@ mvn clean package -DskipTests
 
 更新配置
 
-![](.\img\a3f43e5aa8224f0f2c2de95a2f3602b.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/a3f43e5aa8224f0f2c2de95a2f3602b.png)
 
 打包
 
-![](.\img\999662cf383714e92b1d2cfb038e7fc.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/999662cf383714e92b1d2cfb038e7fc.png)
 
 #### 二：使用client进行调用
 本地Client替换为本地的jar包路径
 
-![](.\img\8a381016d42393958fa3e98c65d6217.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/8a381016d42393958fa3e98c65d6217.png)
 
 启动
 
-![](.\img\39de94ef66c878caf6a3e7bca24d9c5.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/39de94ef66c878caf6a3e7bca24d9c5.png)
 
 #### 三：使用外部client进行调用
 
@@ -145,21 +145,21 @@ mvn clean package -DskipTests
 
 **绿色**表示已经连接到了 MCP server，红色则表示连接失败
 
-![](.\img\7e419d4e244d90929db482d7ca160fa.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/7e419d4e244d90929db482d7ca160fa.png)
 
 浅浅调用一下吧~
 
-![](.\img\b5b78e150a23eb8082c392f362947c9.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/b5b78e150a23eb8082c392f362947c9.png)
 
-![](.\img\60798d1a477db6a8960ffb1f247c4c1.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/60798d1a477db6a8960ffb1f247c4c1.png)
 
-![](.\img\5b20606cc83f0453a35a9319bb078e5.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/5b20606cc83f0453a35a9319bb078e5.png)
 
 Cherry Studio 调用
 
-![](.\img\a59a2b83d6b8ff0faba6ce3abf055b0.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/a59a2b83d6b8ff0faba6ce3abf055b0.png)
 
-![](.\img\bee0d41ca79803eb5ae0e98e048316b.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/bee0d41ca79803eb5ae0e98e048316b.png)
 
 ### 🌐 访问界面
 
@@ -180,7 +180,7 @@ AI助手支持自然语言交互，以下是一些使用示例：
 设置SESSDATA=XXX
 ```
 
-![](.\img\image.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/image.png)
 
 #### 2. 搜索视频
 
@@ -188,7 +188,7 @@ AI助手支持自然语言交互，以下是一些使用示例：
 搜索JAVA学习的视频
 ```
 
-![](.\img\cbfd1db342402885902f5bb999aa8a3.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/cbfd1db342402885902f5bb999aa8a3.png)
 
 #### 3. 下载(单个/批量)
 
@@ -198,15 +198,15 @@ AI助手支持自然语言交互，以下是一些使用示例：
 
 单个
 
-![](.\img\d6fe5f7548d7a0ace506d07c5f517bb.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/d6fe5f7548d7a0ace506d07c5f517bb.png)
 
-![](.\img\eb01ad7e6a0bdb1741bd078c97fc87f.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/eb01ad7e6a0bdb1741bd078c97fc87f.png)
 
 批量
 
-![](.\img\c83098231beb5dc581335d461037bff.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/c83098231beb5dc581335d461037bff.png)
 
-![](.\img\cc15e708b56b02b8498430814dd20f1.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/cc15e708b56b02b8498430814dd20f1.png)
 
 #### 4. 检查状态
 
@@ -469,7 +469,7 @@ logging:
 - **邮箱**: [2260391948@qq.com]
 - **微信**
 
-![](.\img\e860618f2f9b981d0a8b2e57b0e28bb.png)
+![](https://raw.githubusercontent.com/q2260391948/bilibili-mcp/refs/heads/main/img/e860618f2f9b981d0a8b2e57b0e28bb.png)
 
 ## 🎯 路线图
 
